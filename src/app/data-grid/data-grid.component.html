@@ -1,0 +1,167 @@
+<div class="grid-container">
+  <h2>Employee Data Grid</h2>
+
+  <!-- Search Form -->
+  <div class="search-container">
+    <div class="search-form">
+      <div class="form-group">
+        <label for="searchName">Name</label>
+        <input
+          type="text"
+          id="searchName"
+          class="form-control"
+          [(ngModel)]="searchName"
+          placeholder="Search by name"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="searchDepartment">Department</label>
+        <input
+          type="text"
+          id="searchDepartment"
+          class="form-control"
+          [(ngModel)]="searchDepartment"
+          placeholder="Search by department"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="searchSalary">Min Salary</label>
+        <input
+          type="number"
+          id="searchSalary"
+          class="form-control"
+          [(ngModel)]="searchSalary"
+          placeholder="Minimum salary"
+          min="0"
+        />
+      </div>
+
+      <div class="form-group button-group">
+        <button class="btn btn-primary" (click)="onSearch()">
+          Search
+        </button>
+        <button class="btn btn-secondary" (click)="onClearSearch()">
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-bar" *ngIf="selectedRowsCount() > 0">
+    <button class="btn btn-warning" (click)="onEdit()">
+      Edit Selected
+    </button>
+    <button class="btn btn-danger" (click)="onDelete()">
+      Delete Selected ({{ selectedRowsCount() }})
+    </button>
+  </div>
+
+  <!-- Display info using signals -->
+  <div class="info-bar">
+    <span>Total Employees: {{ employeeCount() }}</span>
+    <span *ngIf="selectedRowsCount() > 0"> | Selected: {{ selectedRowsCount() }}</span>
+  </div>
+
+  <!-- Edit Modal -->
+  @if (isEditMode() && editingEmployee()) {
+    <div class="modal-overlay" (click)="onCancelEdit()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3>Edit Employee</h3>
+
+        <div class="edit-form">
+          <div class="form-group">
+            <label>Name *</label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="editingEmployee()!.name"
+              (input)="updateEditField('name', $any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Email *</label>
+            <input
+              type="email"
+              class="form-control"
+              [value]="editingEmployee()!.email"
+              (input)="updateEditField('email', $any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Age</label>
+            <input
+              type="number"
+              class="form-control"
+              [value]="editingEmployee()!.age"
+              (input)="updateEditField('age', +$any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Department *</label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="editingEmployee()!.department"
+              (input)="updateEditField('department', $any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Salary</label>
+            <input
+              type="number"
+              class="form-control"
+              [value]="editingEmployee()!.salary"
+              (input)="updateEditField('salary', +$any($event.target).value)"
+            />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" (click)="onSaveEdit()">
+            Save Changes
+          </button>
+          <button class="btn btn-secondary" (click)="onCancelEdit()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Loading state using signal -->
+  @if (loading()) {
+    <div class="loading-message">
+      Loading employees...
+    </div>
+  }
+
+  <!-- Error state using signal -->
+  @if (error()) {
+    <div class="error-message">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Grid using signal for data -->
+  @if (!loading() && hasData()) {
+    <ag-grid-angular
+      [rowData]="employees()"
+      [columnDefs]="colDefs"
+      [defaultColDef]="defaultColDef"
+      [pagination]="true"
+      [paginationPageSize]="10"
+      [paginationPageSizeSelector]="[10, 20, 50, 100]"
+      [domLayout]="'autoHeight'"
+      [rowSelection]="rowSelection"
+      [theme]="theme"
+      (selectionChanged)="onSelectionChanged($event)"
+    />
+  }
+</div>
